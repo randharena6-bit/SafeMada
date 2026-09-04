@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES, USER_ROLES } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
 
@@ -9,12 +21,19 @@ export default function RegisterScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [telephone, setTelephone] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [role, setRole] = useState('JEUNE');
   const { register, isLoading } = useAuth();
 
   const handleRegister = async () => {
     if (!nom || !prenom || !email || !password) {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Erreur', 'Les mots de passe ne correspondent pas');
       return;
     }
     try {
@@ -27,54 +46,187 @@ export default function RegisterScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Créer un compte</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <View style={styles.logo}>
+            <Ionicons name="person-add" size={40} color={COLORS.white} />
+          </View>
+          <Text style={styles.title}>Créer un compte</Text>
+          <Text style={styles.subtitle}>Rejoignez SAFE MADAGASCAR</Text>
+        </View>
 
-      <TextInput style={styles.input} placeholder="Nom *" value={nom} onChangeText={setNom} />
-      <TextInput style={styles.input} placeholder="Prénom *" value={prenom} onChangeText={setPrenom} />
-      <TextInput style={styles.input} placeholder="Email *" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-      <TextInput style={styles.input} placeholder="Téléphone" value={telephone} onChangeText={setTelephone} keyboardType="phone-pad" />
-      <TextInput style={styles.input} placeholder="Mot de passe *" value={password} onChangeText={setPassword} secureTextEntry />
+        <View style={styles.form}>
+          <Text style={styles.formTitle}>Vos informations</Text>
 
-      <Text style={styles.label}>Rôle</Text>
-      <View style={styles.roleContainer}>
-        {USER_ROLES.map((r) => (
+          <View style={styles.inputWrapper}>
+            <Ionicons name="person-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Nom *"
+              placeholderTextColor={COLORS.grayLight}
+              value={nom}
+              onChangeText={setNom}
+            />
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Ionicons name="person-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Prénom *"
+              placeholderTextColor={COLORS.grayLight}
+              value={prenom}
+              onChangeText={setPrenom}
+            />
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Ionicons name="mail-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Adresse email *"
+              placeholderTextColor={COLORS.grayLight}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+            />
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Ionicons name="call-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Téléphone"
+              placeholderTextColor={COLORS.grayLight}
+              value={telephone}
+              onChangeText={setTelephone}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Ionicons name="lock-closed-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Mot de passe *"
+              placeholderTextColor={COLORS.grayLight}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
+              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.gray} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Ionicons name="lock-closed-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Confirmer le mot de passe *"
+              placeholderTextColor={COLORS.grayLight}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirm}
+            />
+            <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)} style={styles.eyeButton}>
+              <Ionicons name={showConfirm ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.gray} />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.label}>Votre rôle</Text>
+          <View style={styles.roleContainer}>
+            {USER_ROLES.map((r) => (
+              <TouchableOpacity
+                key={r}
+                style={[styles.roleButton, role === r && styles.roleButtonActive]}
+                onPress={() => setRole(r)}
+              >
+                <Text style={[styles.roleText, role === r && styles.roleTextActive]}>
+                  {r.replace('_', ' ')}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <TouchableOpacity
-            key={r}
-            style={[styles.roleButton, role === r && styles.roleButtonActive]}
-            onPress={() => setRole(r)}
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            onPress={handleRegister}
+            disabled={isLoading}
           >
-            <Text style={[styles.roleText, role === r && styles.roleTextActive]}>
-              {r.replace('_', ' ')}
+            {isLoading ? (
+              <ActivityIndicator color={COLORS.white} />
+            ) : (
+              <Text style={styles.buttonText}>S'inscrire</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.link}>
+            <Text style={styles.linkText}>
+              Déjà un compte ? <Text style={styles.linkTextBold}>Se connecter</Text>
             </Text>
           </TouchableOpacity>
-        ))}
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={isLoading}>
-        <Text style={styles.buttonText}>{isLoading ? 'Inscription...' : "S'inscrire"}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.link}>
-        <Text style={styles.linkText}>Déjà un compte ? Se connecter</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.white },
   content: { padding: SIZES.lg, paddingTop: SIZES.xxl },
-  title: { fontSize: 24, fontWeight: '700', color: COLORS.dark, marginBottom: SIZES.lg },
-  input: { borderWidth: 1, borderColor: COLORS.grayLight, borderRadius: SIZES.borderRadius, padding: SIZES.md, marginBottom: SIZES.md, fontSize: 16 },
+  header: { alignItems: 'center', marginBottom: SIZES.lg },
+  logo: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.green,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SIZES.md,
+    elevation: 4,
+  },
+  title: { fontSize: 24, fontWeight: '700', color: COLORS.green },
+  subtitle: { fontSize: 13, color: COLORS.gray, marginTop: 4 },
+  form: {
+    backgroundColor: COLORS.light,
+    borderRadius: SIZES.borderRadius + 4,
+    padding: SIZES.lg,
+    paddingTop: SIZES.md,
+  },
+  formTitle: { fontSize: 16, fontWeight: '700', color: COLORS.dark, marginBottom: SIZES.md },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.borderRadius,
+    marginBottom: SIZES.md,
+    paddingHorizontal: SIZES.md,
+    borderWidth: 1,
+    borderColor: COLORS.grayLight,
+  },
+  inputIcon: { marginRight: SIZES.sm },
+  input: { flex: 1, paddingVertical: 14, fontSize: 16, color: COLORS.dark },
+  eyeButton: { padding: 4 },
   label: { fontSize: 14, fontWeight: '600', color: COLORS.dark, marginBottom: SIZES.sm },
   roleContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: SIZES.sm, marginBottom: SIZES.lg },
-  roleButton: { paddingHorizontal: SIZES.md, paddingVertical: SIZES.sm, borderRadius: SIZES.borderRadius, borderWidth: 1, borderColor: COLORS.grayLight },
-  roleButtonActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  roleButton: { paddingHorizontal: SIZES.md, paddingVertical: SIZES.sm, borderRadius: SIZES.borderRadius, borderWidth: 1, borderColor: COLORS.grayLight, backgroundColor: COLORS.white },
+  roleButtonActive: { backgroundColor: COLORS.green, borderColor: COLORS.green },
   roleText: { fontSize: 12, color: COLORS.gray },
-  roleTextActive: { color: COLORS.white },
-  button: { backgroundColor: COLORS.primary, borderRadius: SIZES.borderRadius, padding: SIZES.md, alignItems: 'center' },
-  buttonText: { color: COLORS.white, fontSize: 16, fontWeight: '600' },
+  roleTextActive: { color: COLORS.white, fontWeight: '600' },
+  button: { backgroundColor: COLORS.green, borderRadius: SIZES.borderRadius, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', elevation: 2 },
+  buttonDisabled: { opacity: 0.6 },
+  buttonText: { color: COLORS.white, fontSize: 16, fontWeight: '700' },
   link: { marginTop: SIZES.lg, alignItems: 'center' },
-  linkText: { color: COLORS.secondary, fontSize: 14 },
+  linkText: { color: COLORS.gray, fontSize: 14 },
+  linkTextBold: { color: COLORS.red, fontWeight: '700' },
 });
