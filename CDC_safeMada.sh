@@ -6,7 +6,7 @@ Signification : Système numérique de prévention, d’alerte et de coordinatio
 
 Type : Application web + application mobile
 Domaine : Protection sociale, sécurité des jeunes, prévention et gestion des alertes
-Public cible : Jeunes, parents/tuteurs, établissements scolaires, associations et structures autorisées.
+Public cible : Jeunes, p    arents/tuteurs, établissements scolaires, associations et structures autorisées.
 
 2. Contexte
 
