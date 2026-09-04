@@ -1,0 +1,41 @@
+@startuml sequence_tracking
+title "SEQUENCE — SUIVI DE DÉPLACEMENT EN TEMPS RÉEL"
+
+actor Jeune as J
+participant "App Mobile - GPS" as G
+participant "App Mobile - Partage" as P
+participant "API / WebSocket (STOMP)" as W
+participant "PostgreSQL/PostGIS" as DB
+participant "Service Temps Réel" as TR
+participant "Carte Interactive (Leaflet)" as M
+participant "Utilisateur autorisé" as UA
+
+J -> P : Active le partage de position (durée: 15min/1h/manuel)
+P -> W : POST /partage (activer)
+W -> DB : Créer partage (statut=ACTIF)
+
+loop Mise à jour périodique (toutes les X sec)
+  J -> G : Récupère la position GPS
+  G -> P : Position (lat, long, précision)
+  P -> W : WebSocket /ws/position {lat, long, id_partage}
+  W -> TR : Publier position sur le topic
+  W -> DB : Enregistrer localisation
+  TR --> M : Actualise le marqueur (temps réel)
+  M --> UA : Affiche trajet à jour
+end
+
+opt Géozone
+  TR -> TR : Vérifie sortie de géozone
+  TR -> UA : Alerte "Le jeune a quitté la zone sûre"
+end
+
+alt Fin du partage
+  J -> P : Désactive le partage
+  P -> W : WebSocket /ws/stop
+  W -> DB : statut=INACTIF, dateFin=now
+  M --> UA : Stop le suivi
+else Durée expirée
+  W -> DB : statut=EXPIRE
+end
+
+@enduml

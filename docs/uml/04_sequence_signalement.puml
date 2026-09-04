@@ -1,0 +1,36 @@
+@startuml sequence_signalement
+title "SEQUENCE — CRÉATION & TRAITEMENT D'UN SIGNALEMENT"
+
+actor Utilisateur as U
+participant "Application" as A
+participant "API REST" as API
+participant "Service Signalement" as S
+participant "Service Priorisation" as SP
+participant "Service Dossier" as SD
+participant "Service Notification" as SN
+participant "Travailleur Social" as TS
+
+U -> A : Remplit le formulaire de signalement
+U -> A : Soumet (type, description, zone, priorité)
+A -> API : POST /signalements
+API -> S : Créer signalement (statut=NOUVEAU)
+
+opt Service IA activé
+  S -> SP : Analyser la description
+  SP -> S : Proposer catégorie / priorité (aide à la décision)
+end
+
+S -> SD : Créer dossier associé (statut=NOUVEAU)
+SD -> SN : Notifier structures autorisées
+
+SN --> TS : Nouveau signalement disponible
+TS -> API : GET /signalements (FILTRE: attribués)
+TS -> API : PUT /signalements/{id} (statut=EN_ANALYSE)
+TS -> API : PUT /dossiers/{id} (orientation, responsable)
+SD -> SD : Ajouter observation + historique
+TS -> API : PUT /dossiers/{id}/statut (transmis, en_suivi)
+
+API --> A : Confirmation (id signalement)
+A --> U : Affiche état du signalement
+
+@enduml

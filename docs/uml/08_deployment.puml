@@ -1,0 +1,42 @@
+@startuml deployment_safe_madagascar
+title "DÉPLOIEMENT — SAFE MADAGASCAR"
+
+node "Appareil du Jeune" {
+  [Application Mobile (Flutter)]
+  [GPS du téléphone]
+}
+
+node "Appareil de l'Utilisateur autorisé" {
+  [Application Web (React) / Mobile]
+}
+
+node "Serveur d'application" {
+  [Backend Spring Boot]
+  [WebSocket / STOMP]
+  [Firebase Admin SDK]
+}
+
+database "Serveur de base de données" {
+  [PostgreSQL / PostGIS]
+}
+
+node "Service IA" {
+  [API Python (Scikit-learn)]
+}
+
+cloud "Internet" {
+  [Firebase Cloud Messaging]
+  [OpenStreetMap / Tile Server]
+}
+
+[Application Mobile (Flutter)] --> [Backend Spring Boot]: HTTPS / REST + WebSocket
+[GPS du téléphone] --> [Application Mobile (Flutter)]: Position GPS
+[Application Web (React) / Mobile] --> [Backend Spring Boot]: HTTPS / REST
+[Backend Spring Boot] --> [PostgreSQL / PostGIS]: JDBC / JPA
+[Backend Spring Boot] --> [Firebase Admin SDK]: Notifications
+[Firebase Admin SDK] --> [Firebase Cloud Messaging]
+[Firebase Cloud Messaging] --> [Application Mobile (Flutter)]: Push
+[Backend Spring Boot] --> [API Python (Scikit-learn)]: Requêtes IA
+[Application Web (React) / Mobile] --> [OpenStreetMap / Tile Server]: Tuiles carte
+
+@enduml

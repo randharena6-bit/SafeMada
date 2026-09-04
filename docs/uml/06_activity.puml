@@ -1,0 +1,45 @@
+@startuml activity_dossier
+title "ACTIVITY — TRAITEMENT D'UN DOSSIER (COORDINATION)"
+
+start
+:Utilisateur crée un signalement;
+:Le système crée un dossier (statut=NOUVEAU);
+:Priorisation automatique (aide à la décision);
+
+partition "Analyse" {
+  :Travailleur social analyse les informations;
+  if "Informations suffisantes ?" then (non)
+    :Demander des informations complémentaires;
+    :Attendre la réponse du déclarant;
+  else (oui)
+  endif
+  :Valide la catégorie et le niveau de priorité;
+}
+
+partition "Orientation" {
+  :Transmet vers une structure compétente;
+  :Notifie la structure;
+}
+
+partition "Prise en charge" {
+  :La structure prend en charge le dossier;
+  :Statut → EN_SUIVI;
+}
+
+partition "Suivi" {
+  repeat
+    :Ajoute des observations;
+    :Met à jour le trajet / position (si concerné);
+  repeat while (Le dossier nécessite encore un suivi) is (oui)
+  ->(non);
+}
+
+partition "Clôture" {
+  :Dossier résolu (RETROUVE / CLOS);
+  :Archive avec historique complet;
+  :Notifie les parties concernées;
+}
+
+stop
+
+@enduml

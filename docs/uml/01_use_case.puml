@@ -1,0 +1,101 @@
+@startuml use_case_safe_madagascar
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+title "CAS D'UTILISATION — SAFE MADAGASCAR"
+
+actor "Jeune / Citoyen" as jeune
+actor "Parent / Tuteur" as parent
+actor "Établissement scolaire" as ecole
+actor "Travailleur social / Association" as ts
+actor "Administrateur" as admin
+
+rectangle "SAFE MADAGASCAR" {
+
+  ' --- AUTH ---
+  usecase "S'inscrire" as UC1
+  usecase "Se connecter" as UC2
+  usecase "Récupérer son compte" as UC3
+  usecase "Modifier son mot de passe" as UC4
+
+  ' --- SIGNALEMENT ---
+  usecase "Créer un signalement" as UC5
+  usecase "Consulter l'état d'un signalement" as UC6
+  usecase "Déclarer une disparition" as UC7
+
+  ' --- SOS / ALERTE ---
+  usecase "Déclencher une alerte SOS" as UC8
+  usecase "Confirmer l'alerte" as UC9
+
+  ' --- DOSSIER / COORDINATION ---
+  usecase "Analyser une signalement" as UC10
+  usecase "Prioriser un dossier" as UC11
+  usecase "Orienter / transmettre un dossier" as UC12
+  usecase "Modifier le statut" as UC13
+  usecase "Ajouter des observations" as UC14
+  usecase "Consulter l'historique" as UC15
+
+  ' --- SUIVI TEMPS REEL ---
+  usecase "Activer le partage de position" as UC16
+  usecase "Suivre le déplacement sur carte" as UC17
+  usecase "Désactiver le partage" as UC18
+  usecase "Configurer une géozone" as UC19
+
+  ' --- NOTIFICATIONS / STATS ---
+  usecase "Recevoir des notifications" as UC20
+  usecase "Consulter le tableau de bord" as UC21
+  usecase "Consulter les statistiques" as UC22
+
+  ' --- ADMIN ---
+  usecase "Gérer les comptes" as UC23
+  usecase "Gérer les rôles / permissions" as UC24
+  usecase "Gérer les catégories de signalements" as UC25
+  usecase "Consulter les journaux d'activité" as UC26
+
+  ' --- CONTACTS ---
+  usecase "Gérer les contacts de confiance" as UC27
+}
+
+' --- Associations acteurs -> UC ---
+jeune --> UC1
+jeune --> UC2
+jeune --> UC5
+jeune --> UC6
+jeune --> UC7
+jeune --> UC8
+jeune --> UC27
+jeune --> UC16
+jeune --> UC18
+
+parent --> UC2
+parent --> UC6
+parent --> UC20
+parent --> UC17
+
+ecole --> UC5
+ecole --> UC20
+ecole --> UC7
+
+ts --> UC10
+ts --> UC11
+ts --> UC12
+ts --> UC13
+ts --> UC14
+ts --> UC15
+ts --> UC17
+ts --> UC19
+ts --> UC21
+
+admin --> UC23
+admin --> UC24
+admin --> UC25
+admin --> UC26
+admin --> UC22
+
+' --- Relations extends/includes ---
+UC8 .> UC9 : <<include>>
+UC7 .> UC5 : <<extend>>
+UC11 .> UC15 : <<include>>
+
+@enduml

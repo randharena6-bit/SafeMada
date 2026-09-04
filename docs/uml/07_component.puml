@@ -1,0 +1,78 @@
+@startuml component_safe_madagascar
+title "COMPOSANTS — ARCHITECTURE SAFE MADAGASCAR"
+
+package "Application Mobile (Flutter)" {
+  [Interface Mobile]
+  [Localisation GPS] as L_MOB
+  [Bouton SOS]
+  [Carte Mobile]
+}
+
+package "Application Web (React + Vite + Tailwind)" {
+  [Interface Web]
+  [Dashboard]
+  [Carte Leaflet]
+}
+
+package "Backend (Spring Boot)" {
+  [API REST] as API
+  [Spring Security / JWT] as SEC
+  [Service Authentification] as AUTH
+  [Service Signalement]
+  [Service Alerte]
+  [Service Dossier]
+  [Service Priorisation]
+  [Service Notification]
+  [Service Suivi Temps Réel] as REALTIME
+  [WebSocket / STOMP] as WS
+}
+
+package "Base de données" {
+  database "PostgreSQL / PostGIS" as DB
+}
+
+package "Notifications" {
+  component "Firebase Cloud Messaging" as FCM
+}
+
+package "Service IA (Python)" {
+  [Classification]
+  [Priorisation intelligente]
+  [Détection de doublons]
+}
+
+package "Cartographie" {
+  component "OpenStreetMap" as OSM
+}
+
+' --- Liens ---
+L_MOB --> API
+L_MOB --> WS
+"Bouton SOS" --> API
+"Carte Mobile" --> OSM
+
+"Interface Web" --> API
+"Dashboard" --> API
+"Carte Leaflet" --> OSM
+"Carte Leaflet" --> WS
+
+API --> SEC
+API --> AUTH
+API --> "Service Signalement"
+API --> "Service Alerte"
+API --> "Service Dossier"
+API --> "Service Priorisation"
+API --> "Service Notification"
+REALTIME --> WS
+
+"Service Signalement" --> DB
+"Service Alerte" --> DB
+"Service Dossier" --> DB
+"Service Priorisation" --> DB
+REALTIME --> DB
+
+"Service Notification" --> FCM
+
+"Service Priorisation" --> "Service IA (Python)"
+
+@enduml

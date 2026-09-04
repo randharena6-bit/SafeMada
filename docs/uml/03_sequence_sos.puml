@@ -1,0 +1,33 @@
+@startuml sequence_sos
+title "SEQUENCE — ALERTE SOS"
+
+actor Jeune as J
+participant "Application Mobile" as A
+participant "API REST Spring Boot" as API
+participant "Service Alerte" as SA
+participant "Service Notification" as SN
+participant "Contacts autorisés" as C
+participant "Travailleur Social" as TS
+
+J -> A : Appuie sur Bouton SOS
+A -> A : Affiche fenêtre de confirmation
+J -> A : Confirme l'alerte
+A -> API : POST /alertes
+API -> SA : Creer alerte (type, statut=ACTIVE)
+SA -> SN : Notifier contacts autorisés
+
+alt Alerte confirmée
+  SN --> C : Notification SOS (temps réel)
+  SN --> TS : Notification SOS (temps réel)
+  TS -> API : GET /alertes/{id}
+  TS -> API : PUT /alertes/{id} (statut=PRISE_EN_CHARGE)
+  API --> TS : Confirmation prise en charge
+else Fausse alerte
+  J -> A : Annule l'alerte
+  A -> API : PUT /alertes/{id} (statut=ANNULEE)
+end
+
+API --> A : Alerte créée (id, statut)
+A --> J : Affiche statut de l'alerte
+
+@enduml

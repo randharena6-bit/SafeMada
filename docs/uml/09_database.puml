@@ -1,0 +1,213 @@
+@startuml er_database
+title "ENTITÉ-RELATION — BASE DE DONNÉES (PostgreSQL / PostGIS)"
+
+' --- ENUM via tables de référence ---
+entity "role_ref" {
+  * code: varchar <<PK>>
+  --
+  libelle: varchar
+}
+
+entity "type_signalement_ref" {
+  * code: varchar <<PK>>
+  --
+  libelle: varchar
+}
+
+entity "statut_dossier_ref" {
+  * code: varchar <<PK>>
+  --
+  libelle: varchar
+}
+
+entity "niveau_priorite_ref" {
+  * code: varchar <<PK>>
+  --
+  libelle: varchar
+}
+
+' --- Tables principales ---
+entity "utilisateur" {
+  * id: uuid <<PK>>
+  --
+  nom: varchar
+  prenom: varchar
+  email: varchar <<UK>>
+  telephone: varchar
+  mot_de_passe: varchar
+  role: varchar <<FK>>
+  actif: boolean
+  date_creation: timestamptz
+}
+
+entity "contact_confiance" {
+  * id: uuid <<PK>>
+  --
+  utilisateur_id: uuid <<FK>>
+  nom: varchar
+  telephone: varchar
+  relation: varchar
+  autorise_sos: boolean
+  date_ajout: timestamptz
+}
+
+entity "signalement" {
+  * id: uuid <<PK>>
+  --
+  utilisateur_id: uuid <<FK>>
+  type: varchar <<FK>>
+  description: text
+  niveau_priorite: varchar <<FK>>
+  statut: varchar <<FK>>
+  zone_generale: varchar
+  date_creation: timestamptz
+  date_modification: timestamptz
+}
+
+entity "piece_jointe" {
+  * id: uuid <<PK>>
+  --
+  signalement_id: uuid <<FK>>
+  nom_fichier: varchar
+  type_mime: varchar
+  url_stockage: varchar
+  date_ajout: timestamptz
+}
+
+entity "alerte" {
+  * id: uuid <<PK>>
+  --
+  utilisateur_id: uuid <<FK>>
+  type: varchar
+  statut: varchar
+  date_creation: timestamptz
+}
+
+entity "dossier" {
+  * id: uuid <<PK>>
+  --
+  signalement_id: uuid <<FK>>
+  responsable_id: uuid <<FK>>
+  statut: varchar <<FK>>
+  date_ouverture: timestamptz
+  date_cloture: timestamptz
+}
+
+entity "dossier_disparition" {
+  * id: uuid <<PK>>
+  --
+  dossier_id: uuid <<FK>>
+  identite_jeune: varchar
+  photo_url: varchar
+  derniere_zone_connue: varchar
+  date_heure_disparition: timestamptz
+  description: text
+  informations_utiles: text
+}
+
+entity "observation" {
+  * id: uuid <<PK>>
+  --
+  dossier_id: uuid <<FK>>
+  utilisateur_id: uuid <<FK>>
+  contenu: text
+  date_ajout: timestamptz
+}
+
+entity "localisation" {
+  * id: uuid <<PK>>
+  --
+  partage_id: uuid <<FK>>
+  latitude: numeric
+  longitude: numeric
+  geom: geometry(Point, 4326)
+  precision: float
+  date: timestamptz
+}
+
+entity "partage_position" {
+  * id: uuid <<PK>>
+  --
+  jeune_id: uuid <<FK>>
+  statut: varchar
+  duree_configuree: interval
+  date_debut: timestamptz
+  date_fin: timestamptz
+}
+
+entity "geozone" {
+  * id: uuid <<PK>>
+  --
+  nom: varchar
+  description: varchar
+  rayon: double
+  latitude_centre: numeric
+  longitude_centre: numeric
+  geom: geometry(Polygon, 4326)
+}
+
+entity "partage_geozone" {
+  --
+  partage_id: uuid <<FK>>
+  geozone_id: uuid <<FK>>
+}
+
+entity "notification" {
+  * id: uuid <<PK>>
+  --
+  utilisateur_id: uuid <<FK>>
+  titre: varchar
+  message: text
+  lu: boolean
+  date_creation: timestamptz
+}
+
+entity "historique" {
+  * id: uuid <<PK>>
+  --
+  dossier_id: uuid <<FK>>
+  utilisateur_id: uuid <<FK>>
+  action: varchar
+  date_action: timestamptz
+}
+
+entity "journal_activite" {
+  * id: uuid <<PK>>
+  --
+  utilisateur_id: uuid <<FK>>
+  action: varchar
+  ip_adresse: varchar
+  date_action: timestamptz
+}
+
+' --- Relations ---
+utilisateur }o--o{ role_ref : "a pour rôle"
+utilisateur ||--o{ contact_confiance : "1..n"
+utilisateur ||--o{ signalement : "crée"
+utilisateur ||--o{ alerte : "déclenche"
+utilisateur ||--o{ notification : "reçoit"
+utilisateur ||--o{ dossier : "responsable"
+utilisateur ||--o{ observation : "écrit"
+utilisateur ||--o{ partage_position : "jeune"
+utilisateur ||--o{ historique : "effectue"
+utilisateur ||--o{ journal_activite : "traces"
+
+type_signalement_ref ||--o{ signalement : ""
+niveau_priorite_ref ||--o{ signalement : ""
+statut_dossier_ref ||--o{ signalement : ""
+statut_dossier_ref ||--o{ dossier : ""
+
+signalement ||--o{ piece_jointe : "1..n"
+signalement ||--o{ dossier : "0..1"
+signalement ||--o{ alerte : "0..n"
+
+dossier ||--o{ dossier_disparition : "0..1"
+dossier ||--o{ observation : "1..n"
+dossier ||--o{ historique : "1..n"
+
+partage_position ||--o{ localisation : "1..n"
+partage_position ||--o{ partage_geozone : ""
+geozone ||--o{ partage_geozone : ""
+geozone }o--o{ partage_position : "surveille"
+
+@enduml

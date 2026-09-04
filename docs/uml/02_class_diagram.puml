@@ -1,0 +1,210 @@
+@startuml class_diagram_safe_madagascar
+title "DIAGRAMME DE CLASSES — SAFE MADAGASCAR"
+
+enum Role {
+  ADMIN
+  PARENT
+  JEUNE
+  ECOLE
+  TRAVAILLEUR_SOCIAL
+  ASSOCIATION
+}
+
+enum StatutSignalement {
+  NOUVEAU
+  EN_ANALYSE
+  TRANSMIS
+  EN_SUIVI
+  RETROUVE
+  CLOS
+}
+
+enum NiveauPriorite {
+  FAIBLE
+  MOYENNE
+  ELEVEE
+  CRITIQUE
+}
+
+enum TypeSignalement {
+  DISPARITION
+  SITUATION_DANGEREUSE
+  VIOLENCE
+  MENACE
+  PROBLEME_SCOLAIRE
+  EXPLOITATION
+  AUTRE
+}
+
+enum StatutAlerte {
+  ACTIVE
+  PRISE_EN_CHARGE
+  RESOLUE
+  ANNULEE
+}
+
+enum StatutPartage {
+  ACTIF
+  INACTIF
+  EXPIRE
+}
+
+class Utilisateur {
+  -id: UUID
+  -nom: String
+  -prenom: String
+  -email: String
+  -telephone: String
+  -motDePasse: String
+  -role: Role
+  -actif: Boolean
+  -dateCreation: DateTime
+  +creerCompte()
+  +seConnecter()
+  +modifierMotDePasse()
+  +deconnecter()
+}
+
+class ContactConfiance {
+  -id: UUID
+  -nom: String
+  -telephone: String
+  -relation: String
+  -autoriseSOS: Boolean
+  -dateAjout: DateTime
+}
+
+class Signalement {
+  -id: UUID
+  -type: TypeSignalement
+  -description: String
+  -niveauPriorite: NiveauPriorite
+  -statut: StatutSignalement
+  -zoneGenerale: String
+  -dateCreation: DateTime
+  -dateModification: DateTime
+  +creer()
+  +transmettre()
+  +mettreAJour()
+  +cloturer()
+}
+
+class PieceJointe {
+  -id: UUID
+  -nomFichier: String
+  -type: String
+  -url: String
+  -dateAjout: DateTime
+}
+
+class Alerte {
+  -id: UUID
+  -type: String
+  -statut: StatutAlerte
+  -dateCreation: DateTime
+  +declencher()
+  +confirmer()
+  +annuler()
+}
+
+class Dossier {
+  -id: UUID
+  -statut: StatutSignalement
+  -dateOuverture: DateTime
+  -dateCloture: DateTime
+  +ouvrir()
+  +orienter()
+  +suivre()
+  +cloturer()
+}
+
+class DossierDisparition {
+  -id: UUID
+  -identiteJeune: String
+  -photoUrl: String
+  -derniereZoneConnue: String
+  -dateHeureDisparition: DateTime
+  -description: String
+  -informationsUtiles: String
+}
+
+class Observation {
+  -id: UUID
+  -contenu: String
+  -dateAjout: DateTime
+}
+
+class Historique {
+  -id: UUID
+  -action: String
+  -dateAction: DateTime
+}
+
+class Localisation {
+  -id: UUID
+  -latitude: Double
+  -longitude: Double
+  -precision: Float
+  -date: DateTime
+}
+
+class PartagePosition {
+  -id: UUID
+  -statut: StatutPartage
+  -dureeConfiguree: Duration
+  -dateDebut: DateTime
+  -dateFin: DateTime
+  +activer()
+  +desactiver()
+  +expirer()
+}
+
+class GeoZone {
+  -id: UUID
+  -nom: String
+  -description: String
+  -rayon: Double
+  -latitudeCentre: Double
+  -longitudeCentre: Double
+  -typeZone: String
+}
+
+class Notification {
+  -id: UUID
+  -titre: String
+  -message: String
+  -lu: Boolean
+  -dateCreation: DateTime
+}
+
+class UtilisateurDTO
+class SignalementDTO
+class DossierDTO
+
+' ---- RELATIONS ----
+
+Utilisateur "1" -- "0..*" ContactConfiance : possède
+Utilisateur "1" -- "0..*" Signalement : crée
+Utilisateur "1" -- "0..*" Alerte : déclenche
+Utilisateur "1" -- "0..*" Notification : reçoit
+Utilisateur "1" -- "0..*" Localisation : envoie
+
+Signalement "1" -- "0..1" Dossier : donne lieu à
+Signalement "1" -- "0..*" PieceJointe : contient
+Signalement "1" -- "1" Localisation : est localisé
+
+Dossier "1" -- "0..1" DossierDisparition : contient
+Dossier "1" -- "0..*" Observation : comprend
+Dossier "1" -- "0..*" Historique : trace
+Dossier "0..*" -- "1" Utilisateur : responsable
+
+PartagePosition "1" -- "0..*" Localisation : génère
+PartagePosition "1" -- "0..*" Utilisateur : partagé avec
+PartagePosition "1" -- "0..*" GeoZone : surveillé par
+
+' ---- DTO (couche API) ----
+UtilisateurDTO --> Utilisateur
+SignalementDTO --> Signalement
+DossierDTO --> Dossier
+
+@enduml

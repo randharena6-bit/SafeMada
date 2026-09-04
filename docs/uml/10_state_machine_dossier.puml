@@ -1,0 +1,24 @@
+@startuml state_dossier
+title "DIAGRAMME D'ÉTATS — CYCLE DE VIE D'UN DOSSIER"
+
+[*] --> NOUVEAU: Signalement créé
+
+NOUVEAU --> EN_ANALYSE: Travailleur social analyse
+NOUVEAU --> CLOS: Rejeté (non pertinent)
+
+EN_ANALYSE --> TRANSMIS: Orientation vers structure compétente
+EN_ANALYSE --> NOUVEAU: Informations complémentaires demandées
+EN_ANALYSE --> CLOS: Dossier sans suite
+
+TRANSMIS --> EN_SUIVI: Structure prend en charge
+TRANSMIS --> CLOS: Transféré sans suite
+
+EN_SUIVI --> RETROUVE: Jeune/incident résolu (disparition)
+EN_SUIVI --> CLOS: Affaire clôturée
+EN_SUIVI --> EN_ANALYSE: Réouverture
+
+RETROUVE --> CLOS: Confirmation de résolution
+
+CLOS --> [*]
+
+@enduml
