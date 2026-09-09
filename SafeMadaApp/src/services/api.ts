@@ -1,5 +1,5 @@
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from 'expo-sqlite/kv-store';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 

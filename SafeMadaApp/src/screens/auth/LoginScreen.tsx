@@ -62,7 +62,8 @@ export default function LoginScreen({ navigation }: any) {
           <View style={styles.logo}>
             <Ionicons name="shield-checkmark" size={56} color={COLORS.white} />
           </View>
-          <Text style={styles.title}>SAFE MADAGASCAR</Text>          <Text style={styles.subtitle}>
+          <Text style={styles.title}>SAFE MADAGASCAR</Text>
+          <Text style={styles.subtitle}>
             Prévenir · Alerter · Protéger
           </Text>
           <Text style={styles.description}>
